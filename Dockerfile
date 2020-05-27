@@ -155,15 +155,15 @@ EXPOSE ${ZEPPELIN_PORT}
 
 #ENV SPARK_SUBMIT_OPTIONS "--jars /opt/zeppelin/sansa-examples-spark-2016-12.jar"
 
-ENV ZEPPELIN_JAVA_OPTS=${ZEPPELIN_JAVA_OPTS:-"-Dspark.driver.memory=4g -Dspark.executor.memory=8g -Dspark.cores.max=16"}
+ENV ZEPPELIN_JAVA_OPTS=${ZEPPELIN_JAVA_OPTS:-"-Dspark.driver.memory=4g -Dspark.executor.memory=8g -Dspark.cores.max=8"}
 ENV ZEPPELIN_MEM=${ZEPPELIN_MEM:-"-Xms8g -Xmx28g -XX:MaxPermSize=8g"}
 ENV ZEPPELIN_INTP_MEM=${ZEPPELIN_INTP_MEM:-"-Xms4g -Xmx24g"}
 #ENV ZEPPELIN_INTP_JAVA_OPTS=${ZEPPELIN_INTP_JAVA_OPTS}
 
 WORKDIR ${ZEPPELIN_HOME}
 
-HEALTHCHECK NONE
-#HEALTHCHECK CMD curl --fail http://localhost:8080/ || exit 1
+#HEALTHCHECK NONE
+HEALTHCHECK CMD curl --fail http://localhost:${ZEPPELIN_PORT}/ || exit 1
 
-CMD ["/usr/lib/zeppelin/bin/zeppelin.sh"]
+CMD ["/bin/bash","/usr/lib/zeppelin/bin/zeppelin.sh"]
 
