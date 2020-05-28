@@ -22,7 +22,7 @@ COPY spark-base/execute-step.sh /
 COPY spark-base/finish-step.sh /
 
 RUN apt update -y \
-      && apt install -y wget curl bash openjdk-8-jdk python3 python3-dev python3-pip python3-setuptools python-setuptools python-pip python-dev libnss3 \
+      && apt install -y tzdata wget curl bash openjdk-8-jdk python3 python3-dev python3-pip python3-setuptools python-setuptools python-pip python-dev libnss3 \
       && ln -s /lib64/ld-linux-x86-64.so.2 /lib/ld-linux-x86-64.so.2 \
       && chmod +x *.sh \
       && wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
@@ -33,6 +33,7 @@ RUN apt update -y \
       #&& jar uf /spark/jars/spark-core_2.11-${SPARK_VERSION}.jar org/apache/spark/ui/static/timeline-view.css \
       && cd /
 
+RUN dpkg-reconfigure --frontend noninteractive tzdata
 #Give permission to execute scripts
 RUN chmod +x /wait-for-step.sh && chmod +x /execute-step.sh && chmod +x /finish-step.sh
 
@@ -77,7 +78,9 @@ ENV SPARK_HOME=/spark
 #RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
 #### ---- Python 3 ----
 COPY requirements.txt ./
-RUN apt install -y net-tools build-essential wget vim python-arrow python3-numpy python3-scipy python3-pandas python3-matplotlib python3-arrow \
+RUN apt install -y iputils-ping net-tools build-essential wget vim python-matplotlib python-arrow python3-scipy python-numpy python3-numpy python3-scipy python3-matplotlib python3-arrow
+RUN pip install -r requirements.txt \
+  && pip install pandas_datareader scikit-learn \
   && pip3 install -r requirements.txt \
   && pip3 install pandas_datareader scikit-learn \
   && apt-get clean \

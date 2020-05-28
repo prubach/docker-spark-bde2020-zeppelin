@@ -104,8 +104,6 @@ ENV PATH $HADOOP_PREFIX/bin/:$PATH
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod a+x /entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
-
 # from docker-hadoop/dotanode
 HEALTHCHECK CMD curl -f http://localhost:50075/ || exit 1
 
@@ -129,6 +127,11 @@ ENV SPARK_MASTER "spark://spark-master:7077"
 
 EXPOSE 8081
 
-CMD ["/datanode.sh"]
+COPY start_wrapper.sh /
+RUN chmod a+x /start_wrapper.sh
 
-CMD ["/bin/bash", "/worker.sh"]
+#CMD ["/datanode.sh"]
+#ENTRYPOINT ["/entrypoint.sh"]
+
+#CMD ["/bin/bash", "/worker.sh"]
+CMD ["/entrypoint.sh", "/start_wrapper.sh"]
