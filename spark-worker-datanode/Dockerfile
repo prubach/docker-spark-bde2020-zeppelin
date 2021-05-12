@@ -1,6 +1,6 @@
 #FROM bde2020/spark-worker:2.4.5-hadoop2.7
 #FROM bde2020/spark-worker:2.2.0-hadoop2.8-hive-java8
-FROM ubuntu:bionic
+FROM ubuntu:focal
 
 MAINTAINER Pawel Rubach <pawel.rubach@gmail.com>
 
@@ -13,15 +13,15 @@ ENV ENABLE_INIT_DAEMON true
 ENV INIT_DAEMON_BASE_URI http://identifier/init-daemon
 ENV INIT_DAEMON_STEP spark_master_init
 
-ENV SPARK_VERSION=2.4.5
-ENV HADOOP_VERSION=2.7
+ENV SPARK_VERSION=3.1.1
+ENV HADOOP_VERSION=3.2
 
 COPY spark-base/wait-for-step.sh /
 COPY spark-base/execute-step.sh /
 COPY spark-base/finish-step.sh /
 
 RUN apt update -y \
-      && apt install -y net-tools curl netcat wget curl bash openjdk-8-jdk python3 python3-dev python3-pip python3-setuptools python-setuptools python-pip python-dev libnss3 \
+      && apt install -y net-tools curl netcat wget curl bash openjdk-8-jdk python3 python3-pip python3-dev python3-setuptools python-setuptools python-pip-whl python-dev libnss3 \
       && ln -s /lib64/ld-linux-x86-64.so.2 /lib/ld-linux-x86-64.so.2 \
       && chmod +x *.sh \
       && wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
@@ -79,7 +79,7 @@ ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 #
 #RUN gpg --keyserver pool.sks-keyservers.net --recv-key C36C5F0F
 #
-ENV HADOOP_VERSION 2.7.7
+ENV HADOOP_VERSION 3.2.2
 ENV HADOOP_URL https://www.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
 RUN set -x \
     && curl -fSL "$HADOOP_URL" -o /tmp/hadoop.tar.gz \
@@ -89,7 +89,7 @@ RUN set -x \
     && rm /tmp/hadoop.tar.gz*
 
 RUN ln -s /opt/hadoop-$HADOOP_VERSION/etc/hadoop /etc/hadoop
-RUN cp /etc/hadoop/mapred-site.xml.template /etc/hadoop/mapred-site.xml
+#RUN cp /etc/hadoop/mapred-site.xml.template /etc/hadoop/mapred-site.xml
 RUN mkdir /opt/hadoop-$HADOOP_VERSION/logs
 
 RUN mkdir /hadoop-data
@@ -105,7 +105,7 @@ ADD entrypoint.sh /entrypoint.sh
 RUN chmod a+x /entrypoint.sh
 
 # from docker-hadoop/dotanode
-HEALTHCHECK CMD curl -f http://localhost:50075/ || exit 1
+HEALTHCHECK CMD curl -f http://localhost:9864/ || exit 1
 
 ENV HDFS_CONF_dfs_datanode_data_dir=file:///hadoop/dfs/data
 RUN mkdir -p /hadoop/dfs/data
@@ -114,7 +114,7 @@ VOLUME /hadoop/dfs/data
 ADD datanode.sh /datanode.sh
 RUN chmod a+x /datanode.sh
 
-EXPOSE 50075
+EXPOSE 9864
 
 ENV HADOOP_LOG=/hadoop/logs
 

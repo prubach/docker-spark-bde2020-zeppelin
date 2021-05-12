@@ -1,6 +1,6 @@
 #FROM bde2020/spark-worker:2.4.5-hadoop2.7
 #FROM bde2020/spark-worker:2.2.0-hadoop2.8-hive-java8
-FROM ubuntu:bionic
+FROM ubuntu:focal
 
 MAINTAINER Pawel Rubach <pawel.rubach@gmail.com>
 
@@ -14,16 +14,18 @@ ENV ENABLE_INIT_DAEMON true
 ENV INIT_DAEMON_BASE_URI http://identifier/init-daemon
 ENV INIT_DAEMON_STEP spark_master_init
 
-ENV SPARK_VERSION=2.4.5
-ENV HADOOP_VERSION=2.7
+ENV SPARK_VERSION=3.1.1
+ENV HADOOP_VERSION=3.2
 
 COPY spark-base/wait-for-step.sh /
 COPY spark-base/execute-step.sh /
 COPY spark-base/finish-step.sh /
 
 RUN apt update -y \
-      && apt install -y tzdata wget curl bash openjdk-8-jdk python3 python3-dev python3-pip python3-setuptools python-setuptools python-pip python-dev libnss3 \
+      && apt install -y tzdata wget curl bash openjdk-8-jdk python2 python3 python3-dev python3-pip python3-setuptools python-setuptools python-pip-whl python-dev libnss3 \
       && ln -s /lib64/ld-linux-x86-64.so.2 /lib/ld-linux-x86-64.so.2 \
+      && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py \
+      && python2 get-pip.py \
       && chmod +x *.sh \
       && wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
       && tar -xvzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz \
@@ -47,14 +49,14 @@ ENV SPARK_WORKER_LOG /spark/logs
 COPY spark-worker/worker.sh /
 
 #### ---- Host Arguments variables----
-ARG APACHE_SPARK_VERSION=2.4.5 
-ARG APACHE_HADOOP_VERSION=2.7.4 
+ARG APACHE_SPARK_VERSION=3.1.1
+ARG APACHE_HADOOP_VERSION=3.2.2
 ARG SPARK_MASTER="spark://spark-master:7077" 
 #ARG ZEPPELIN_DOWNLOAD_URL=http://apache.cs.utah.edu/zeppelin
 ARG ZEPPELIN_DOWNLOAD_URL=http://www-us.apache.org/dist/zeppelin
 ARG ZEPPELIN_INSTALL_DIR=/usr/lib 
 ARG ZEPPELIN_HOME=${ZEPPELIN_INSTALL_DIR}/zeppelin 
-ARG ZEPPELIN_VERSION=${ZEPPELIN_VERSION:-0.8.2}
+ARG ZEPPELIN_VERSION=${ZEPPELIN_VERSION:-0.9.0}
 ARG ZEPPELIN_PKG_NAME=zeppelin-${ZEPPELIN_VERSION}-bin-all 
 ARG ZEPPELIN_PORT=8080 
 
@@ -78,7 +80,7 @@ ENV SPARK_HOME=/spark
 #RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
 #### ---- Python 3 ----
 COPY requirements.txt ./
-RUN apt install -y iputils-ping net-tools build-essential wget vim python-matplotlib python-arrow python3-scipy python-numpy python3-numpy python3-scipy python3-matplotlib python3-arrow
+RUN apt install -y iputils-ping net-tools build-essential wget vim python-matplotlib-data python-arrow-doc python-numpy python3-numpy python3-scipy python3-matplotlib python3-arrow
 RUN pip install -r requirements.txt \
   && pip install pandas_datareader scikit-learn \
   && pip3 install -r requirements.txt \

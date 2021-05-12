@@ -4,3 +4,5 @@ scipy
 panda
 pandasql
 matplotlib
+kafka-python
+findspark
